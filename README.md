@@ -1,4 +1,4 @@
-React Boilerplate
+npReact Boilerplate
 =====================
 
 A minimal and light dev environment for ReactJS.
