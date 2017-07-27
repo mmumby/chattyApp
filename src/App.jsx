@@ -1,51 +1,51 @@
 import React, {Component} from 'react';
 import ChatBar from './ChatBar.jsx';
 import MessageList from './MessageList.jsx';
-import NavBar from './NavBar.jsx'
+import NavBar from './NavBar.jsx';
+
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
     currentUser: {name: "Bob"},
-    messages: [
-    {
-      username: "Bob",
-      content: "Has anyone seen my marbles?",
-    },
-    {
-      username: "Sam",
-      content: "No dice.",
-    },
-    {
-      username: "Anonymous",
-      content: "No, I think you lost them. You lost your marbles Bob. You lost them for good.",
-    }
-    ]
+    messages: []
+    };
   }
-}
+//function to turn new message into a string
+  sendNewMessage(newMessage) {
+    this.socket.send(JSON.stringify(newMessage));
+  }
 
-componentDidMount() {
-  console.log("componentDidMount <App />");
-  setTimeout(() => {
-    console.log("Simulating incoming message");
-    // Add a new message to the list of messages in the data store
-    const newMessage = {id: 4, username: "Michelle", content: "Take a Hike Bob!"};
-    const messages = this.state.messages.concat(newMessage)
-    // Update the state of the app component.
-    // Calling setState will trigger a call to render() in App and all child components.
-    this.setState({messages: messages})
-  }, 3000);
-}
+  componentDidMount() {
+  //connecting to chatty-server
+    this.socket = new WebSocket("ws://localhost:3001");
+//sending data to the server
+    this.socket.onopen = () => {
+      console.log("Connected to the Server!!")
+    };
 
+    this.socket.onmessage = (event) => {
+      this.addNewMessage(JSON.parse(event.data));
+    };
+  }
+ // Add a new message to the list of messages in the data store
+  addNewMessage(newMessage) {
+    const newMessages = this.state.messages.concat(newMessage);
+    this.setState({
+      messages: newMessages
+    });
+  }
 
-
+// show html divs on the page
   render() {
     return (
       <div>
-      <NavBar/>
-      <MessageList messages={this.state.messages}/>
-      <ChatBar currentUser={this.state.currentUser}/>
+        <NavBar/>
+        <MessageList messages={this.state.messages}/>
+        <ChatBar currentUser={this.state.currentUser}
+          sendMessage={this.sendNewMessage.bind(this)}
+          addMessage={this.addNewMessage.bind(this)}/>
       </div>
     );
   }
