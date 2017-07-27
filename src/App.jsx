@@ -8,8 +8,9 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-    currentUser: {name: "Bob"},
-    messages: []
+    currentUser: {name: "Meredith"},
+    messages: [],
+    users: ""
     };
   }
 //function to turn new message into a string
@@ -26,7 +27,17 @@ class App extends Component {
     };
 
     this.socket.onmessage = (event) => {
-      this.addNewMessage(JSON.parse(event.data));
+      let payload = JSON.parse(event.data);
+console.log(payload);
+      switch(payload.type){
+        case 'usersOnline':
+        this.setState({
+          users: payload.users
+        });
+        break;
+        default:
+        this.addNewMessage(payload);
+      }
     };
   }
  // Add a new message to the list of messages in the data store
@@ -41,7 +52,7 @@ class App extends Component {
   render() {
     return (
       <div>
-        <NavBar/>
+        <NavBar users={this.state.users}/>
         <MessageList messages={this.state.messages}/>
         <ChatBar currentUser={this.state.currentUser}
           sendMessage={this.sendNewMessage.bind(this)}

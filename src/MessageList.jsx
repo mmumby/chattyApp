@@ -1,13 +1,12 @@
 import React, {Component} from 'react';
 import Message from './Message.jsx'
+import ChatBar from './ChatBar.jsx'
 
 class MessageList extends Component {
 
-  render() {
+   render() {
     return (
       <div className="messages">
-          <div className="message system">
-          </div>
           {
          this.props.messages.map((messages, index) => {
           return (
