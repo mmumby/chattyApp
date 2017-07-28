@@ -22,11 +22,25 @@ const wss = new SocketServer({ server });
 wss.on('connection', (ws) => {
   console.log('Client connected');
 
-  // console.log(wss.clients.size);
+//check how many users are online, send into to client
+ function onlineUserCount() {
+    let connectedUser = {type: 'usersOnline',
+      users: wss.clients.size
+      }
+    let onlineUserData = JSON.stringify(connectedUser);
+    console.log(connectedUser);
+    wss.clients.forEach(function each(client) {
+
+      if (client.readyState === WebSocket.OPEN) {
+        client.send(onlineUserData);
+      }
+    });
+  }
+  onlineUserCount();
+
 
   ws.onmessage = (message) => {
     console.log('received: %s', message.data);
-
     //override imcoming message ID and set a new ID
     let messageData = JSON.parse(message.data);
     messageData.id = uuid();
@@ -39,50 +53,21 @@ wss.on('connection', (ws) => {
         messageData.type = "incomingMessage";
         break;
       default:
-}
+    }
     let dataString = JSON.stringify(messageData);
-console.log(messageData);
+    console.log(messageData);
     // Broadcast message to everyone else (not sender)
     wss.clients.forEach(function each(client) {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
         client.send(dataString);
-      }
-    });
-
-
-
-    let connectedUser = {type: 'usersOnline',
-      users: wss.clients.size
-      }
-  let onlineUserData = JSON.stringify(connectedUser);
-  console.log(connectedUser);
-
-wss.clients.forEach(function each(client) {
-
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(onlineUserData);
-      }
-    });
+    }
+  });
 
 
   };
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  onlineUserCount();
 });
-
-
-
-
-
-// wss.on('connection', (ws) => {
-//   console.log('Client connected');
-
-//   // At this point in time wss.clients is an array that includes
-//   // the ws objects of all clients, including the one who just connected.
-
-//   ws.on('close', () => {
-//     console.log('Client disconnected')
-
-//     // At this point in time wss.clients no longer contains the ws object
-//     // of the client who disconnected
-//   });
+});
