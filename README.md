@@ -35,3 +35,5 @@ npm run lint
 * [webpack-dev-server](https://github.com/webpack/webpack-dev-server)
 
 ### Final Product
+
+!["Screenshot of final product"](https://github.com/mmumby/chattyApp/blob/master/doc/ChattyApp.png)
