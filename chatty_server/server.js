@@ -18,33 +18,29 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 
-//once connected, do things
-wss.on('connection', (ws) => {
-  console.log('Client connected');
-
-//check how many users are online, send into to client
- function onlineUserCount() {
+//check how many users are online
+//send info to client when function called.
+function onlineUserCount() {
     let connectedUser = {type: 'usersOnline',
       users: wss.clients.size
       }
     let onlineUserData = JSON.stringify(connectedUser);
-    console.log(connectedUser);
     wss.clients.forEach(function each(client) {
-
       if (client.readyState === WebSocket.OPEN) {
         client.send(onlineUserData);
       }
     });
   }
+//once connected, do things
+wss.on('connection', (ws) => {
+  console.log('Client connected');
   onlineUserCount();
 
-
   ws.onmessage = (message) => {
-    console.log('received: %s', message.data);
     //override imcoming message ID and set a new ID
     let messageData = JSON.parse(message.data);
     messageData.id = uuid();
-
+    //change message type from post to incoming
     switch(messageData.type) {
       case "postNotification":
         messageData.type = "incomingNotification";
@@ -53,21 +49,19 @@ wss.on('connection', (ws) => {
         messageData.type = "incomingMessage";
         break;
       default:
-    }
+      }
     let dataString = JSON.stringify(messageData);
-    console.log(messageData);
-    // Broadcast message to everyone else (not sender)
+    // Broadcast message to everyone except the sender.
     wss.clients.forEach(function each(client) {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
         client.send(dataString);
-    }
-  });
-
-
+      }
+    });
   };
-  // Set up a callback for when a client closes the socket. This usually means they closed their browser.
+  //callback for when a client closes the socket.
+  //update online user count
   ws.on('close', () => {
     console.log('Client disconnected');
-  onlineUserCount();
-});
+    onlineUserCount();
+  });
 });

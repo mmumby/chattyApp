@@ -8,7 +8,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-    currentUser: {name: "Meredith"},
+    currentUser: {name: "Anonymous"},
     messages: [],
     users: ""
     };
@@ -28,7 +28,6 @@ class App extends Component {
 
     this.socket.onmessage = (event) => {
       let payload = JSON.parse(event.data);
-console.log(payload);
       switch(payload.type){
         case 'usersOnline':
         this.setState({
@@ -47,7 +46,6 @@ console.log(payload);
       messages: newMessages
     });
   }
-
 // show html divs on the page
   render() {
     return (
